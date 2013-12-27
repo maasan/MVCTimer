@@ -1,0 +1,23 @@
+//
+// Prefix header for all source files of the 'MVCTimer' target in the 'MVCTimer' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+  #import <UIKit/UIKit.h>
+  #import <Foundation/Foundation.h>
+#endif
+
+#ifdef DEBUG
+  #define LOG_DEBUG(fmt, ...) NSLog((@"[DEBUG] %s [Line %d]" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+  #define LOG_DEBUG(...)
+#endif
+
+#define LOG_TRACE(fmt, ...) NSLog((@"[TRACE] %s [Line %d]" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#define LOG_ERROR(fmt, ...) NSLog((@"[ERROR] %s [Line %d]" fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
