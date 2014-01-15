@@ -1,7 +1,16 @@
 #import "NTKTimer.h"
 #import "NTKTicker.h"
 
-@interface NTKTimer ()
+@interface NTKTimer () <NTKTickerDelegate>
+{
+  struct {
+    unsigned int timerDidStart : 1;
+    unsigned int timerDidUpdate : 1;
+    unsigned int timerDidFinish : 1;
+    unsigned int timerDidPause : 1;
+    unsigned int timerDidReset : 1;
+  } _delegateFlags;
+}
 
 @property (nonatomic, readwrite, strong) NTKTicker *ticker;
 @property (nonatomic, readwrite, assign) NSTimeInterval elapsedTime; // 経過時間
@@ -9,6 +18,20 @@
 @end
 
 @implementation NTKTimer
+
+//--------------------------------------------------------------//
+#pragma mark -- プロパティ --
+//--------------------------------------------------------------//
+
+- (void)setDelegate:(id)delegate
+{
+  _delegate = delegate;
+  _delegateFlags.timerDidStart = [delegate respondsToSelector:@selector(timerDidStart:)];
+  _delegateFlags.timerDidUpdate = [delegate respondsToSelector:@selector(timerDidUpdate:)];
+  _delegateFlags.timerDidFinish = [delegate respondsToSelector:@selector(timerDidFinish:)];
+  _delegateFlags.timerDidPause = [delegate respondsToSelector:@selector(timerDidPause:)];
+  _delegateFlags.timerDidReset = [delegate respondsToSelector:@selector(timerDidReset:)];
+}
 
 - (NSTimeInterval)currentTime
 {
@@ -85,12 +108,10 @@
   _timerStatus = NTKTimerStatusStart;
   
 	// Tickerを開始する
-//  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-    [_ticker start];
-//  });
+  [_ticker start];
 	
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(timerDidStart:)]) {
+	if (_delegateFlags.timerDidStart) {
 		[_delegate timerDidStart:self];
 	}
 }
@@ -104,9 +125,7 @@
   }
   
 	// Tickerを一時停止する
-//  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-    [_ticker pause];
-//  });
+  [_ticker pause];
 	
   // 動作状態を変更する
   _timerStatus = NTKTimerStatusPause;
@@ -116,7 +135,7 @@
   LOG_DEBUG(@"%3.3f %3.3f", self.currentTime, [d_pauseDate timeIntervalSinceDate:d_startDate]);
 
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(timerDidPause:)]) {
+	if (_delegateFlags.timerDidPause) {
 		[_delegate timerDidPause:self];
 	}
 }
@@ -133,9 +152,7 @@
   _timerStatus = NTKTimerStatusReset;
 
 	// Tickerを停止する
-//  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
-    [_ticker reset];
-//  });
+  [_ticker reset];
 
   // 経過時間を初期化する
   _elapsedTime = 0;
@@ -143,7 +160,7 @@
   LOG_DEBUG(@"%3.3f", self.currentTime);
   
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(timerDidReset:)]) {
+	if (_delegateFlags.timerDidReset) {
 		[_delegate timerDidReset:self];
 	}
 }
@@ -170,20 +187,16 @@
     LOG_DEBUG(@"%3.3f %3.3f", self.currentTime, [d_pauseDate timeIntervalSinceDate:d_startDate]);
 
 		// デリゲートに通知する
-//    dispatch_async(dispatch_get_main_queue(), ^(void){
-      if ([_delegate respondsToSelector:@selector(timerDidFinish:)]) {
+    if (_delegateFlags.timerDidFinish) {
         [_delegate timerDidFinish:self];
-      }
-//    });
+    }
 	}
 	// それ以外の場合
 	else {
 		// デリゲートに通知する
-//    dispatch_async(dispatch_get_main_queue(), ^(void){
-      if ([_delegate respondsToSelector:@selector(timerDidUpdate:)]) {
+    if (_delegateFlags.timerDidUpdate) {
         [_delegate timerDidUpdate:self];
-      }
-//    });
+    }
 	}
 }
 

@@ -1,12 +1,26 @@
 #import "NTKTicker.h"
 
-@interface NTKTicker ()
+@interface NTKTicker () {
+  struct {
+    unsigned int tickerNotifyTick : 1;
+  } _delegateFlags;
+}
 
 @property (nonatomic, readwrite, strong) NSTimer *innerTimer;
 
 @end
 
 @implementation NTKTicker
+
+//--------------------------------------------------------------//
+#pragma mark -- プロパティ --
+//--------------------------------------------------------------//
+
+- (void)setDelegate:(id)delegate
+{
+  _delegate = delegate;
+  _delegateFlags.tickerNotifyTick = [delegate respondsToSelector:@selector(tickerNotifyTick:)];
+}
 
 //--------------------------------------------------------------//
 #pragma mark -- 初期化 --
@@ -102,7 +116,7 @@
 - (void)p_timerFireMethod:(NSTimer *)timer
 {
   // デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(tickerNotifyTick:)]) {
+	if (_delegateFlags.tickerNotifyTick) {
 		[_delegate tickerNotifyTick:self];
 	}
 }

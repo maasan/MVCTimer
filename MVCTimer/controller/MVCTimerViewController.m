@@ -3,6 +3,7 @@
 #import "NTKStopwatch.h"
 
 @interface MVCTimerViewController ()
+<NTKTimerDelegate, NTKStopwatchDelegate>
 
 @property (nonatomic, readwrite, strong) NTKTimer *timer;
 @property (nonatomic, readwrite, strong) NTKStopwatch *stopwatch;
@@ -57,9 +58,6 @@
 {
   [_timer start];
 //  [_stopwatch start];
-  
-  // メインスレッドの動作を一時停止するテスト
-  [NSThread sleepForTimeInterval:2.25];
 }
 
 - (IBAction)pauseButtonPressed:(id)sender

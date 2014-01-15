@@ -9,10 +9,12 @@ typedef NS_OPTIONS(NSUInteger, NTKTimerMode) {
   NTKTimerModeCountDown = 1 << 1,
 };
 
+@protocol NTKTimerDelegate;
+
 @interface NTKTimer : NSObject
 
 @property (nonatomic, readonly, copy) NSString *identifier;
-@property (nonatomic, readwrite, weak) id delegate;
+@property (nonatomic, readwrite, weak) id<NTKTimerDelegate> delegate;
 @property (nonatomic, readonly, assign) NTKTimerStatus timerStatus;    // 動作状態
 @property (nonatomic, readonly, assign) NTKTimerMode timerMode;        // 動作モード
 @property (nonatomic, readonly, assign) NSTimeInterval currentTime;    // 現在時間
@@ -27,7 +29,7 @@ typedef NS_OPTIONS(NSUInteger, NTKTimerMode) {
 
 @end
 
-@interface NSObject (NTKTimerDelegate)
+@protocol NTKTimerDelegate
 
 - (void)timerDidStart:(NTKTimer *)sender;
 - (void)timerDidUpdate:(NTKTimer *)sender;

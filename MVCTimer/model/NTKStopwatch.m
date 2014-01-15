@@ -1,13 +1,34 @@
 #import "NTKStopwatch.h"
 #import "NTKTicker.h"
 
-@interface NTKStopwatch ()
+@interface NTKStopwatch () <NTKTickerDelegate>
+{
+  struct {
+    unsigned int stopwatchDidStart : 1;
+    unsigned int stopwatchDidUpdate : 1;
+    unsigned int stopwatchDidPause : 1;
+    unsigned int stopwatchDidReset : 1;
+  } _delegateFlags;
+}
 
 @property (nonatomic, readwrite, strong) NTKTicker *ticker;
 
 @end
 
 @implementation NTKStopwatch
+
+//--------------------------------------------------------------//
+#pragma mark -- プロパティ --
+//--------------------------------------------------------------//
+
+- (void)setDelegate:(id)delegate
+{
+  _delegate = delegate;
+  _delegateFlags.stopwatchDidStart = [delegate respondsToSelector:@selector(stopwatchDidStart:)];
+  _delegateFlags.stopwatchDidUpdate = [delegate respondsToSelector:@selector(stopwatchDidUpdate:)];
+  _delegateFlags.stopwatchDidPause = [delegate respondsToSelector:@selector(stopwatchDidPause:)];
+  _delegateFlags.stopwatchDidReset = [delegate respondsToSelector:@selector(stopwatchDidReset:)];
+}
 
 //--------------------------------------------------------------//
 #pragma mark -- 初期化 --
@@ -64,7 +85,7 @@
 	[_ticker start];
 	
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(stopwatchDidStart:)]) {
+	if (_delegateFlags.stopwatchDidStart) {
 		[_delegate stopwatchDidStart:self];
 	}
 }
@@ -88,7 +109,7 @@
   LOG_DEBUG(@"%3.3f %3.3f", self.currentTime, [d_pauseDate timeIntervalSinceDate:d_startDate]);
   
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(stopwatchDidPause:)]) {
+	if (_delegateFlags.stopwatchDidPause) {
 		[_delegate stopwatchDidPause:self];
 	}
 }
@@ -113,7 +134,7 @@
   LOG_DEBUG(@"%3.3f", _currentTime);
   
 	// デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(stopwatchDidReset:)]) {
+	if (_delegateFlags.stopwatchDidReset) {
 		[_delegate stopwatchDidReset:self];
 	}
 }
@@ -128,7 +149,7 @@
   _currentTime = [self p_roundToMilisec:_currentTime + _ticker.tickInterval];
   
   // デリゲートに通知する
-	if ([_delegate respondsToSelector:@selector(stopwatchDidUpdate:)]) {
+	if (_delegateFlags.stopwatchDidUpdate) {
 		[_delegate stopwatchDidUpdate:self];
 	}
 }

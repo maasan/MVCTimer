@@ -4,10 +4,12 @@ typedef NS_ENUM(NSUInteger, NTKTickerStatus) {
 	NTKTickerStatusPause,
 };
 
+@protocol NTKTickerDelegate;
+
 @interface NTKTicker : NSObject
 
 @property (nonatomic, readonly, copy) NSString *identifier;
-@property (nonatomic, readwrite, weak) id delegate;
+@property (nonatomic, readwrite, weak) id<NTKTickerDelegate> delegate;
 @property (nonatomic, readonly, assign) NTKTickerStatus tickerStatus;
 @property (nonatomic, readonly, assign) NSTimeInterval tickInterval; // ティック周期
 
@@ -19,7 +21,7 @@ typedef NS_ENUM(NSUInteger, NTKTickerStatus) {
 
 @end
 
-@interface NSObject (NTKTickerDelegate)
+@protocol NTKTickerDelegate
 
 - (void)tickerNotifyTick:(NTKTicker *)sender;
 
